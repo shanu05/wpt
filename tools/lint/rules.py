@@ -331,6 +331,12 @@ class DuplicateBasenamePath(Rule):
     to_fix = "rename files so they have unique basename paths"
 
 
+class TentativeDirectoryName(Rule):
+    name = "TENTATIVE-DIRECTORY-NAME"
+    description = "Directories for tentative files must have the form 'foo.tentative'"
+    to_fix = "rename directory to be of the form 'foo.tentative'"
+
+
 class Regexp(six.with_metaclass(abc.ABCMeta)):
     @abc.abstractproperty
     def pattern(self):

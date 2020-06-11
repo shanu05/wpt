@@ -423,7 +423,12 @@ class SourceFile(object):
         tentative file.
 
         See https://web-platform-tests.org/writing-tests/file-names.html#test-features"""
-        return "tentative" in self.meta_flags
+        if "tentative" in self.meta_flags:
+            return True
+        # Unlike most other directory-based checking (print, crashtests, support, etc),
+        # tentative directories are off the form 'foo.tentative'. This allows noting
+        # which particular sub-feature is tentative.
+        return any([d.endswith('.tentative') for d in self.dir_path.split(os.path.sep)])
 
     @property
     def name_is_print_reftest(self):
