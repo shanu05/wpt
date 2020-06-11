@@ -84,6 +84,7 @@ def test_ahem_copy_negative(path):
                                   "css/tentative.bar/baz.html",
                                   "css/bar-tentative/baz.html"])
 def test_tentative_directories(path):
+    path = os.path.join(*path.split("/"))
     expected_error = ("TENTATIVE-DIRECTORY-NAME",
                       "Directories for tentative files must have the form 'foo.tentative'",
                       path,
@@ -96,6 +97,7 @@ def test_tentative_directories(path):
 @pytest.mark.parametrize("path", ["css/bar.html",
                                   "css/bar.tentative/baz.html"])
 def test_tentative_directories_negative(path):
+    path = os.path.join(*path.split("/"))
     errors = check_path("/foo/", path)
 
     assert errors == []
