@@ -8,8 +8,12 @@ steps:
   condition: eq(variables['safaridriver_diagnose'], true)
 - ${{ if eq(parameters.channel, 'preview') }}:
   - script: |
+      echo "Installing STP"
       HOMEBREW_NO_AUTO_UPDATE=1 brew cask install tools/ci/azure/safari-technology-preview.rb
-      sudo "/Applications/Safari Technology Preview.app/Contents/MacOS/safaridriver" --enable
+      # Workaround for `sudo safaridriver --enable` not working:
+      # https://github.com/web-platform-tests/wpt/issues/21751
+      mkdir -p ~/Library/WebDriver/
+      cp tools/ci/azure/com.apple.SafariTechnologyPreview.plist ~/Library/WebDriver/
       defaults write com.apple.SafariTechnologyPreview WebKitJavaScriptCanOpenWindowsAutomatically 1
       defaults write com.apple.SafariTechnologyPreview ExperimentalServerTimingEnabled 1
     displayName: 'Install Safari Technology Preview'
