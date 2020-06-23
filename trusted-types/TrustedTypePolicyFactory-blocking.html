@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<script src="/resources/testharness.js"></script>
+<script src="/resources/testharnessreport.js"></script>
+<script src="support/helper.sub.js"></script>
+<meta http-equiv="Content-Security-Policy" content="trusted-types *">
+
+<body>
+<script>
+
+  test(t => {
+    trustedTypes.addEventListener('beforecreatepolicy', (e) => {
+      e.preventDefault(); // don't let this policy be created.
+    });
+    policy = trustedTypes.createPolicy("default", {});
+    assert_equals(policy, null);
+  }, 'TrustedTypePolicyFactory successfully blocked by event listener.');
+
+</script>
