@@ -102,6 +102,10 @@ test(t => {
   assert_equals(new ScrollTimeline({timeRange: 100}).endScrollOffset, 'auto');
 }, 'A ScrollTimeline created with the default endScrollOffset should default to \'auto\'');
 
+test(t => {
+  assert_array_equals(new ScrollTimeline({timeRange: 100}).scrollOffsets, []);
+}, 'A ScrollTimeline created with the default scrollOffsets should default to []');
+
 const gValidScrollOffsetValues = [
   'auto',
   0,
@@ -133,7 +137,8 @@ const gValidScrollOffsetSuffixes = [
 for (let offset of gValidScrollOffsetValues) {
   test(function() {
     const scrollTimeline = new ScrollTimeline(
-        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset});
+        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset,
+        scrollOffsets: [offset]});
 
     // Special case for 0; this is a valid value, but like computed style will
     // be output as '0px' when queried.
@@ -141,6 +146,7 @@ for (let offset of gValidScrollOffsetValues) {
 
     assert_equals(scrollTimeline.startScrollOffset, offset);
     assert_equals(scrollTimeline.endScrollOffset, offset);
+    assert_array_equals(scrollTimeline.scrollOffsets, [offset]);
   }, '\'' + offset + '\' is a valid scroll offset value');
 }
 
@@ -148,10 +154,12 @@ for (const suffix of gValidScrollOffsetSuffixes) {
   test(function() {
     const offset = '75' + suffix;
     const scrollTimeline = new ScrollTimeline(
-        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset});
+        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset,
+        scrollOffsets: [offset]});
 
     assert_equals(scrollTimeline.startScrollOffset, offset);
     assert_equals(scrollTimeline.endScrollOffset, offset);
+    assert_array_equals(scrollTimeline.scrollOffsets, [offset]);
   }, '\'' + suffix + '\' is a valid scroll offset unit');
 }
 
@@ -186,6 +194,16 @@ for (const offset of gInvalidScrollOffsetValues) {
   }, '\'' + offset + '\' is an invalid scroll offset value');
 }
 
+for (const offset of gInvalidScrollOffsetValues) {
+  test(function() {
+    const constructorFunc = function() {
+      new ScrollTimeline(
+          {timeRange: 100, scrollOffsets: ['0px', offset]})
+    };
+    assert_throws_js(TypeError, constructorFunc);
+  }, '\'' + offset + '\' is an invalid scroll offset value in scrollOffsets');
+}
+
 for (const suffix of gInvalidScrollOffsetSuffixes) {
   test(function() {
     const offset = '75' + suffix;
@@ -197,6 +215,16 @@ for (const suffix of gInvalidScrollOffsetSuffixes) {
   }, '\'' + suffix + '\' is an invalid scroll offset unit');
 }
 
+for (const suffix of gInvalidScrollOffsetSuffixes) {
+  test(function() {
+    const offset = '75' + suffix;
+    const constructorFunc = function() {
+      new ScrollTimeline(
+          {timeRange: 100, scrollOffsets: ['0px', offset]});
+    };
+    assert_throws_js(TypeError, constructorFunc);
+  }, '\'' + suffix + '\' is an invalid scroll offset unit in scrollOffsets');
+}
 
 const offset_target = document.createElement('div');
 
@@ -210,7 +238,8 @@ const gValidElementBasedScrollOffsetValues = [
 for (let offset of gValidElementBasedScrollOffsetValues) {
   test(function() {
     const scrollTimeline = new ScrollTimeline(
-        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset});
+        {timeRange: 100, startScrollOffset: offset, endScrollOffset: offset,
+        scrollOffsets: [offset]});
 
     // Special case unspecified threshold since it gets initialized to 0.
     if (!offset.hasOwnProperty('threshold'))
@@ -220,6 +249,8 @@ for (let offset of gValidElementBasedScrollOffsetValues) {
     assert_equals(scrollTimeline.startScrollOffset.threshold, offset.threshold);
     assert_equals(scrollTimeline.endScrollOffset.target, offset.target);
     assert_equals(scrollTimeline.endScrollOffset.threshold, offset.threshold);
+    assert_equals(scrollTimeline.scrollOffsets[0].target, offset.target);
+    assert_equals(scrollTimeline.scrollOffsets[0].threshold, offset.threshold);
   }, '\'' + JSON.stringify(offset) + '\' is a valid scroll offset value');
 }
 
@@ -241,6 +272,15 @@ for (let offset of gInvalidElementBasedScrollOffsetValues) {
   }, '\'' + JSON.stringify(offset) + '\' is an invalid scroll offset value');
 }
 
+for (let offset of gInvalidElementBasedScrollOffsetValues) {
+  test(function() {
+    const constructorFunc = function() {
+      new ScrollTimeline(
+          {timeRange: 100, scrollOffsets: [offset]})
+    };
+    assert_throws_js(TypeError, constructorFunc);
+  }, '\'' + JSON.stringify(offset) + '\' is an invalid scroll offset value in scrollOffsets');
+}
 
 
 // timeRange
