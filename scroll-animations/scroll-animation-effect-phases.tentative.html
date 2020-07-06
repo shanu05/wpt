@@ -151,4 +151,181 @@
       );
     }
   }
+
+
+  // Two main test cases for hold_phase;
+  // 1. Pause, and then make the timeline changes phases
+  // 2. Make timeline inactive (display: none), then set current_time
+
+  promise_test(async t => {
+    const target = createDiv(t);
+    const timeline = createScrollTimelineWithOffsets(t, "20%", "80%");
+    const effect = new KeyframeEffect(
+      target,
+      {
+        opacity: [0.3, 0.7]
+      },
+      {
+        duration: 1000
+      }
+    );
+    const animation = new Animation(effect, timeline);
+    const scroller = timeline.scrollSource;
+    const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+
+    animation.play();
+    await animation.ready;
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "before");
+    assert_equals(timeline.currentTime, 0);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity before pause");
+
+    animation.pause();
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "before");
+    assert_equals(timeline.currentTime, 0);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after pause");
+
+    animation.play();
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "before");
+    assert_equals(timeline.currentTime, 0);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after play");
+  }, 'Verify that (play -> pause -> play) doesn\'t change phase/progress.');
+
+  promise_test(async t => {
+    const target = createDiv(t);
+    const timeline = createScrollTimelineWithOffsets(t, "20%", "80%");
+    const effect = new KeyframeEffect(
+      target,
+      {
+        opacity: [0.3, 0.7]
+      },
+      {
+        duration: 1000
+      }
+    );
+    const animation = new Animation(effect, timeline);
+    const scroller = timeline.scrollSource;
+    const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+
+    animation.play();
+    await animation.ready;
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "before");
+    assert_equals(timeline.currentTime, 0);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity before pause");
+
+    animation.pause();
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "before");
+    assert_equals(timeline.currentTime, 0);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after pause");
+
+    scroller.scrollTop = 0.5 * maxScroll;
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "active");
+    assert_equals(timeline.currentTime, 500);
+    assert_equals(animation.currentTime, 0);
+    assert_equals(effect.getComputedTiming().localTime, 0, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after pause");
+  }, 'Pause in before phase, scroll timeline into active phase');
+
+  promise_test(async t => {
+    const target = createDiv(t);
+    const timeline = createScrollTimelineWithOffsets(t, "20%", "80%");
+    const effect = new KeyframeEffect(
+      target,
+      {
+        opacity: [0.3, 0.7]
+      },
+      {
+        duration: 1000
+      }
+    );
+    const animation = new Animation(effect, timeline);
+    const scroller = timeline.scrollSource;
+    const maxScroll = scroller.scrollHeight - scroller.clientHeight;
+
+    animation.play();
+    await animation.ready;
+
+    // scroller.scrollTop = 0.5 * maxScroll;
+    // await waitForNextFrame();
+
+    scroller.style.overflow = "visible";
+    await waitForNextFrame();
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "inactive");
+    assert_equals(timeline.currentTime, null);
+
+    assert_equals(animation.currentTime, null);
+    assert_equals(effect.getComputedTiming().localTime, null, "effect local time");
+
+    // Check effect phase
+    // progress == null AND opacity == 1 implies we are in the effect before phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after pause");
+
+    animation.currentTime = 1100;
+    await waitForNextFrame();
+    await waitForNextFrame();
+
+    // Check timeline phase
+    assert_equals(timeline.phase, "inactive");
+    assert_equals(timeline.currentTime, null);
+    assert_equals(animation.currentTime, 1100);
+    assert_equals(effect.getComputedTiming().localTime, 1100, "effect local time");
+
+    // Check effect phase
+    // progress != null AND opacity != 1 implies we are in the effect active phase
+    assert_equals(effect.getComputedTiming().progress, null, "effect progress");
+    assert_equals(window.getComputedStyle(target).getPropertyValue("opacity"), "1", "effect opacity after pause");
+  }, 'Make scroller inactive, then set current time to an in range time');
 </script>
