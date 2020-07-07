@@ -355,6 +355,26 @@
         set_user_verified: function(authenticator_id, uv) {
             return window.test_driver_internal.set_user_verified(authenticator_id, uv);
         },
+
+        /**
+         * Sets the storage access policy for a third-party origin when loaded
+         * in the current first party context
+         *
+         * {@link https://privacycg.github.io/storage-access/#set-storage-access-command}
+         *
+         * @param {String} origin - A URL to block or allow. May be "*" to indicate all URLs.
+         * @param {String} state - the storage access setting. Must be either "allowed" or "blocked".
+         *
+         * @returns {Promise} fulfilled after the policy has been set, or rejected if setting the
+         *                    policy fails
+         */
+        set_storage_access: function(origin, embeddingOrigin, state) {
+            if (state !== "allowed" && state !== "blocked") {
+                throw new Error("storage access statue must be 'allowed' or 'blocked'");
+            }
+            const blocked = state === "blocked";
+            return window.test_driver_internal.set_storage_access(origin, embeddingOrigin, blocked);
+        },
     };
 
     window.test_driver_internal = {
@@ -567,6 +587,14 @@
          *
          */
         set_user_verified: function(authenticator_id, uv) {
+            return Promise.reject(new Error("unimplemented"));
+        },
+
+        /**
+         * Sets the storage access policy for a third-party origin when loaded
+         * in the current first party context
+         */
+        set_storage_access: function(origin, embeddingOrigin, blocked) {
             return Promise.reject(new Error("unimplemented"));
         },
     };
