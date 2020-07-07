@@ -91,15 +91,6 @@ function compareNDEFRecords(providedRecord, receivedRecord) {
                       new Uint8Array(receivedRecord.data));
 }
 
-// Compares NDEFWriteOptions structures that were provided to API and
-// received by the mock mojo service.
-function assertNDEFWriteOptionsEqual(provided, received) {
-  if (provided.ignoreRead !== undefined)
-    assert_equals(provided.ignoreRead, !!received.ignoreRead);
-  else
-    assert_equals(!!received.ignore_read, true);
-}
-
 // Compares NDEFReaderOptions structures that were provided to API and
 // received by the mock mojo service.
 function assertNDEFReaderOptionsEqual(provided, received) {
@@ -319,9 +310,6 @@ var WebNFCTest = (() => {
       this.reading_messages_.push(message);
       // Ignores reading if NFC operation is suspended.
       if(this.operations_suspended_) return;
-      // Ignores reading if NDEFWriteOptions.ignoreRead is true.
-      if (this.pending_write_options_ && this.pending_write_options_.ignoreRead)
-        return;
       // Triggers onWatch if the new message matches existing watchers.
       for (let watcher of this.watchers_) {
         if (matchesWatchOptions(message, watcher.options)) {
